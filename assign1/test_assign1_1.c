@@ -140,8 +140,8 @@ testSeveralPages(void) {
   // append a new block
   TEST_CHECK(appendEmptyBlock(&fh))
   printf("second block is appended")
-  ASSERT_EQUALS_INT(fh.totalNumPages == 2)
-
+  ASSERT_EQUALS_INT(fh.totalNumPages == 2, "expected 2 pages in the file")
+  printf("The file has two pages")
   // check that the second page is empty 
   TEST_CHECK(readBlock(2, &fh, ph2));
   for (i=0; i < PAGE_SIZE; i++)
@@ -159,12 +159,12 @@ testSeveralPages(void) {
 
   // Check that the contents of ph1 are still correct
   for ( int i = 0; i < PAGE_SIZE; i++){
-    ASSERT_TRUE(ph1[i] == (i % 10) + '0');
+    ASSERT_TRUE((ph1[i] == (i % 10) + '0'), "character in page read from disk is the one we expected.");
   }
 
   TEST_CHECK(getBlockPos(&fh) == fh.curPagePos);
-  TEST_CHECK(ensureCapacity(10,%fh))
-  ASSERT_EQUALS_INT(fh.totalNumPages == 10, "expected 10 pages in the file capacity");
+  TEST_CHECK((ensureCapacity(10, %fh)));
+  ASSERT_EQUALS_INT((fh.totalNumPages == 10), "expected 10 pages in the file capacity");
   printf("Capacity file has the correct number of pages");
 
   // Destroy the new page file
