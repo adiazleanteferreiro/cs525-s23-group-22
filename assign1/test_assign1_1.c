@@ -109,7 +109,8 @@ testSeveralPages(void) {
 
   SM_FileHandle fh;
   SM_PageHandle ph1, ph2;
-  int i
+
+  int i;
 
   testName = "test several page content";
 
@@ -125,7 +126,7 @@ testSeveralPages(void) {
   // change ph1 to be a string and write that one to disk
   for (i=0; i < PAGE_SIZE; i++)
     ph1[i] = (i % 10) + '0';
-    ph[i] = (i % 60) + '0';
+    ph2[i] = (i % 60) + '0';
 
   TEST_CHECK(writeBlock (1, &fh, ph1));
   printf("writing first block\n");
@@ -137,7 +138,7 @@ testSeveralPages(void) {
   printf("reading first block\n");
 
   // append a new block
-  TEST_CHECK(appendEmptyBlock(fh))
+  TEST_CHECK(appendEmptyBlock(&fh))
   printf("second block is appended")
   ASSERT_EQUALS_INT(fh.totalNumPages == 2)
 
@@ -164,7 +165,7 @@ testSeveralPages(void) {
   TEST_CHECK(getBlockPos(&fh) == fh.curPagePos);
   TEST_CHECK(ensureCapacity(10,%fh))
   ASSERT_EQUALS_INT(fh.totalNumPages == 10, "expected 10 pages in the file capacity");
-  printf("Capacity file has the correct number of pages")
+  printf("Capacity file has the correct number of pages");
 
   // Destroy the new page file
   TEST_CHECK(destroyPageFile (TESTPF));  
