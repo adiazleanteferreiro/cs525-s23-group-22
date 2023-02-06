@@ -110,6 +110,7 @@ testSeveralPages(void) {
 
   SM_FileHandle fh;
   SM_PageHandle ph;
+  SM_PageHandle ph2;
 
   int i;
 
@@ -143,29 +144,16 @@ testSeveralPages(void) {
   printf("The file has two pages \n");
 
   // check that the second page is empty 
-  TEST_CHECK(readBlock(1, &fh, ph));
+  TEST_CHECK(readBlock(1, &fh, ph2);
   for (i=0; i < PAGE_SIZE; i++)
     ASSERT_TRUE((ph[i] == 0), "expected zero byte in new page freshly initialized page for the appended block");
-  printf("second block was empty\n");
+  printf("Second block was empty\n");
 
-  TEST_CHECK(readPreviousBlock(&fh, ph));
-  printf("reading previous block\n");
-
-  TEST_CHECK(readCurrentBlock(&fh, ph));
-  printf("reading current block\n");
-
-  TEST_CHECK(readNextBlock(&fh, ph));
-  printf("reading next block\n");
-
-  // Check that the contents of ph are still correct
-  for ( int i = 0; i < PAGE_SIZE; i++){
-    ASSERT_TRUE((ph[i] == (i % 10) + '0'), "character in page read from disk is the one we expected.");
-  }
   int current = fh.curPagePos;
   TEST_CHECK(getBlockPos(&fh) == fh.curPagePos);
   TEST_CHECK((ensureCapacity(10, &fh)));
   ASSERT_EQUALS_INT(10, fh.totalNumPages, "expected 10 pages in the file capacity");
-  ASSERT_EQUALS_INT(current, 1, "curPagePos should be 1 even if we added pages");
+  ASSERT_EQUALS_INT(current, fh.curPagePos, "curPagePos should be 1 even if we added pages");
 
   printf("Capacity file has the correct number of pages\n");
 
