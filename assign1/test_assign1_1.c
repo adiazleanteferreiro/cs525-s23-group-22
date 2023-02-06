@@ -140,7 +140,7 @@ testSeveralPages(void) {
   // append a new block
   TEST_CHECK(appendEmptyBlock(&fh))
   printf("second block is appended")
-  ASSERT_EQUALS_INT(fh.totalNumPages == 2, "expected 2 pages in the file")
+  ASSERT_EQUALS_INT(2, fh.totalNumPages, "expected 2 pages in the file")
   printf("The file has two pages")
   // check that the second page is empty 
   TEST_CHECK(readBlock(2, &fh, ph2));
@@ -164,7 +164,7 @@ testSeveralPages(void) {
 
   TEST_CHECK(getBlockPos(&fh) == fh.curPagePos);
   TEST_CHECK((ensureCapacity(10, %fh)));
-  ASSERT_EQUALS_INT((fh.totalNumPages == 10), "expected 10 pages in the file capacity");
+  ASSERT_EQUALS_INT(10, fh.totalNumPages, "expected 10 pages in the file capacity");
   printf("Capacity file has the correct number of pages");
 
   // Destroy the new page file
