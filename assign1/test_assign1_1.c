@@ -123,7 +123,7 @@ testSeveralPages(void) {
   TEST_CHECK(openPageFile (TESTPF, &fh));
   printf("created and opened file\n");
 
-  // change ph1 to be a string and write that one to disk
+  // change ph to be a string and write that one to disk
   for (i=0; i < PAGE_SIZE; i++)
     ph[i] = (i % 10) + '0';
 
@@ -148,16 +148,16 @@ testSeveralPages(void) {
     ASSERT_TRUE((ph[i] == 0), "expected zero byte in new page freshly initialized page for the appended block");
   printf("second block was empty\n");
 
-  TEST_CHECK(readPreviousBlock(&fh, ph1));
+  TEST_CHECK(readPreviousBlock(&fh, ph));
   printf("reading previous block\n");
 
-  TEST_CHECK(readCurrentBlock(&fh, ph1));
+  TEST_CHECK(readCurrentBlock(&fh, ph));
   printf("reading current block\n");
 
-  TEST_CHECK(readNextBlock(&fh, ph1));
+  TEST_CHECK(readNextBlock(&fh, ph));
   printf("reading next block\n");
 
-  // Check that the contents of ph1 are still correct
+  // Check that the contents of ph are still correct
   for ( int i = 0; i < PAGE_SIZE; i++){
     ASSERT_TRUE((ph[i] == (i % 10) + '0'), "character in page read from disk is the one we expected.");
   }
