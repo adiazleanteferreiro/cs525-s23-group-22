@@ -109,15 +109,14 @@ void
 testSeveralPages(void) {
 
   SM_FileHandle fh;
-  SM_PageHandle ph1, ph2;
+  SM_PageHandle ph;
 
   int i;
 
   testName = "test several page content";
 
   // allocate memory for each page
-  ph1 = (SM_PageHandle) malloc(PAGE_SIZE);
-  ph2 = (SM_PageHandle) malloc(PAGE_SIZE);
+  ph = (SM_PageHandle) malloc(PAGE_SIZE);
 
   // create a new pages file
   TEST_CHECK(createPageFile (TESTPF));
@@ -126,16 +125,15 @@ testSeveralPages(void) {
 
   // change ph1 to be a string and write that one to disk
   for (i=0; i < PAGE_SIZE; i++)
-    ph1[i] = (i % 10) + '0';
-    ph2[i] = (i % 60) + '0';
+    ph[i] = (i % 10) + '0';
 
-  TEST_CHECK(writeBlock (1, &fh, ph1));
+  TEST_CHECK(writeBlock (0, &fh, ph));
   printf("writing first block\n");
 
   // read back the page containing the string and check that it is correct
-  TEST_CHECK(readFirstBlock (&fh, ph1));
+  TEST_CHECK(readFirstBlock (&fh, ph));
   for (i=0; i < PAGE_SIZE; i++)
-    ASSERT_TRUE((ph1[i] == (i % 10) + '0'), "character in page read from disk is the one we expected.");
+    ASSERT_TRUE((ph[i] == (i % 10) + '0'), "character in page read from disk is the one we expected.");
   printf("reading first block\n");
 
   // append a new block
@@ -143,10 +141,11 @@ testSeveralPages(void) {
   printf("second block is appended");
   ASSERT_EQUALS_INT(2, fh.totalNumPages, "expected 2 pages in the file");
   printf("The file has two pages");
+
   // check that the second page is empty 
-  TEST_CHECK(readBlock(2, &fh, ph2));
+  TEST_CHECK(readBlock(2, &fh, ph));
   for (i=0; i < PAGE_SIZE; i++)
-    ASSERT_TRUE((ph2[i] == 0), "expected zero byte in new page freshly initialized page for the appended block");
+    ASSERT_TRUE((ph[i] == 0), "expected zero byte in new page freshly initialized page for the appended block");
   printf("second block was empty\n");
 
   TEST_CHECK(readPreviousBlock(&fh, ph1));
@@ -160,15 +159,18 @@ testSeveralPages(void) {
 
   // Check that the contents of ph1 are still correct
   for ( int i = 0; i < PAGE_SIZE; i++){
-    ASSERT_TRUE((ph1[i] == (i % 10) + '0'), "character in page read from disk is the one we expected.");
+    ASSERT_TRUE((ph[i] == (i % 10) + '0'), "character in page read from disk is the one we expected.");
   }
-
+  int current = fh.curPagePos
   TEST_CHECK(getBlockPos(&fh) == fh.curPagePos);
   TEST_CHECK((ensureCapacity(10, &fh)));
   ASSERT_EQUALS_INT(10, fh.totalNumPages, "expected 10 pages in the file capacity");
+  ASSERT_EQUALS_INT(current, 1, "curPagePos should be 1 even if we added pages");
+
   printf("Capacity file has the correct number of pages");
 
   // Destroy the new page file
   TEST_CHECK(destroyPageFile (TESTPF));  
 
+    free(ph);
 }
