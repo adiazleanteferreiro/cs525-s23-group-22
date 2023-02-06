@@ -109,6 +109,7 @@ testSeveralPages(void) {
 
   SM_FileHandle fh;
   SM_PageHandle ph1, ph2;
+  int i
 
   testName = "test several page content";
 
