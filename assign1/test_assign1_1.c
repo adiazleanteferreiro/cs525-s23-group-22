@@ -27,6 +27,7 @@ main (void)
 
   testCreateOpenClose();
   testSinglePageContent();
+  testSeveralPages(); 
 
   return 0;
 }
