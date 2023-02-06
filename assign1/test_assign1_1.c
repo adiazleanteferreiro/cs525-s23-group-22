@@ -138,12 +138,12 @@ testSeveralPages(void) {
 
   // append a new block
   TEST_CHECK(appendEmptyBlock(&fh))
-  printf("second block is appended");
+  printf("second block is appended\n");
   ASSERT_EQUALS_INT(2, fh.totalNumPages, "expected 2 pages in the file");
-  printf("The file has two pages");
+  printf("The file has two pages \n");
 
   // check that the second page is empty 
-  TEST_CHECK(readBlock(2, &fh, ph));
+  TEST_CHECK(readBlock(1, &fh, ph));
   for (i=0; i < PAGE_SIZE; i++)
     ASSERT_TRUE((ph[i] == 0), "expected zero byte in new page freshly initialized page for the appended block");
   printf("second block was empty\n");
@@ -167,7 +167,7 @@ testSeveralPages(void) {
   ASSERT_EQUALS_INT(10, fh.totalNumPages, "expected 10 pages in the file capacity");
   ASSERT_EQUALS_INT(current, 1, "curPagePos should be 1 even if we added pages");
 
-  printf("Capacity file has the correct number of pages");
+  printf("Capacity file has the correct number of pages\n");
 
   // Destroy the new page file
   TEST_CHECK(destroyPageFile (TESTPF));  
