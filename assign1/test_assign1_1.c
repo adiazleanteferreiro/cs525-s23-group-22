@@ -141,7 +141,7 @@ testSeveralPages(void) {
   TEST_CHECK(appendEmptyBlock(&fh))
   printf("second block is appended");
   ASSERT_EQUALS_INT(2, fh.totalNumPages, "expected 2 pages in the file")
-  printf("The file has two pages")
+  printf("The file has two pages");
   // check that the second page is empty 
   TEST_CHECK(readBlock(2, &fh, ph2));
   for (i=0; i < PAGE_SIZE; i++)
