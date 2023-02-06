@@ -161,7 +161,7 @@ testSeveralPages(void) {
   for ( int i = 0; i < PAGE_SIZE; i++){
     ASSERT_TRUE((ph[i] == (i % 10) + '0'), "character in page read from disk is the one we expected.");
   }
-  int current = fh.curPagePos
+  int current = fh.curPagePos;
   TEST_CHECK(getBlockPos(&fh) == fh.curPagePos);
   TEST_CHECK((ensureCapacity(10, &fh)));
   ASSERT_EQUALS_INT(10, fh.totalNumPages, "expected 10 pages in the file capacity");
@@ -172,5 +172,5 @@ testSeveralPages(void) {
   // Destroy the new page file
   TEST_CHECK(destroyPageFile (TESTPF));  
 
-    free(ph);
+  free(ph);
 }
