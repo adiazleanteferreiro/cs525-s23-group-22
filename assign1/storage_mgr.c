@@ -165,14 +165,19 @@ extern RC appendEmptyBlock (SM_FileHandle *fHandle){
     SM_FileHeader fHeader;
     fread(&fHeader, sizeof(fHeader), 1, file);
     fseek(file, fHandle->totalNumPages, SEEK_SET);
+
     char * charArray =  calloc(PAGE_SIZE, 1);
+
     int status = fwrite(charArray, 1, PAGE_SIZE, file);
+
     if(status != PAGE_SIZE){
         return RC_WRITE_FAILED;
     }
     fHandle -> totalNumPages++;
     fHeader.totalNumPages++;
-    fseek(file, PAGE_SIZE*position, SEEK_SET); // We go back to the previous current position
+    int pos = PAGE_SIZE * position + sizeof(fHeader);
+    
+    fseek(file, pos, SEEK_SET); // We go back to the previous current position
     free(charArray);
     return RC_OK;
 }
