@@ -112,6 +112,8 @@ testSeveralPages(void) {
   SM_PageHandle ph;
   SM_PageHandle ph2;
 
+  testName = "test serveral page content";
+
   int i;
 
   // allocate memory for each page
@@ -144,7 +146,7 @@ testSeveralPages(void) {
   printf("The file has two pages \n");
 
   // check that the second page is empty 
-  TEST_CHECK(readBlock(1, &fh, ph2));
+  TEST_CHECK(readNextBlock(&fh, ph2));
 
   for (i=0; i < PAGE_SIZE; i++)
     ASSERT_TRUE((ph2[i] == 0), "expected zero byte in new page freshly initialized page for the appended block");
