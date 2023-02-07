@@ -6,11 +6,11 @@
 #include <stdio.h>
 #include <unistd.h>
 
-extern void initStorageManager(void) {
-    if (access(".", W_OK) != 0){
+extern void initStorageManager(void) { // Initialize the Storage Manager
+    if (access(".", W_OK) != 0){ // Check if we have write permission for the current working directory
         printf("Storage manager doesn't have write permission in this folder.\nExiting...\n");
         exit(RC_WRITE_FAILED);
-    }
+    } 
     // The following code initializes the structs in case there were stored values
     SM_FileHandle fileHandle;
     fileHandle.fileName = NULL;
@@ -23,12 +23,12 @@ extern void initStorageManager(void) {
     printf("Storage manager initialized\n");
 }
 
-extern RC createPageFile (char *fileName){
-    FILE *file = fopen(fileName, "w+");
+extern RC createPageFile (char *fileName){ // Create a page file
+    FILE *file = fopen(fileName, "w+"); // Open the file for both reading and writing
     SM_FileHeader fHeader;
-    fHeader.totalNumPages = 1;
-    fHeader.curPagePos = 0;
-    fwrite(&fHeader,sizeof(fHeader),1,file);
+    fHeader.totalNumPages = 1;          // The created file has 1 page
+    fHeader.curPagePos = 0;             // The current position of the created file is 0
+    fwrite(&fHeader,1,sizeof(fHeader),file);    // Write 
     char *charArray = calloc(PAGE_SIZE, 1);
     int write = fwrite(charArray, 1, PAGE_SIZE, file);
     fclose(file);
