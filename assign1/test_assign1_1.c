@@ -149,18 +149,16 @@ testSeveralPages(void) {
   TEST_CHECK(readNextBlock(&fh, ph2));
 
   for (i=0; i < PAGE_SIZE; i++)
-    ASSERT_TRUE((ph2[i] == 0), "expected zero byte in new page freshly initialized page for the appended block");
+    ASSERT_TRUE((ph2[i] == 0), "expected zero byte in new page after appendeding the block");
   printf("Second block was empty\n");
 
   int current = fh.curPagePos;
 
   ASSERT_EQUALS_INT(getBlockPos(&fh), fh.curPagePos, "Obtained position is not correct");
   printf("Position obtained correctly\n");
-
-  printf("Checking capacity method correctly\n");
   TEST_CHECK((ensureCapacity(10, &fh)));
   ASSERT_EQUALS_INT(10, fh.totalNumPages, "expected 10 pages in the file capacity");
-  ASSERT_EQUALS_INT(current, fh.curPagePos, "curPagePos should be 1 even if we added pages");
+  ASSERT_EQUALS_INT(current, fh.curPagePos, "curPagePos should be the previous position even if we added pages");
 
   printf("Capacity file has the correct number of pages\n");
 
