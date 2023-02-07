@@ -168,4 +168,6 @@ testSeveralPages(void) {
 
   free(ph);
   free(ph2);
+  
+  TEST_DONE();
 }
