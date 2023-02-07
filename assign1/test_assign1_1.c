@@ -118,6 +118,8 @@ testSeveralPages(void) {
 
   // allocate memory for each page
   ph = (SM_PageHandle) malloc(PAGE_SIZE);
+  ph2 = (SM_PageHandle) malloc(PAGE_SIZE);
+
 
   // create a new pages file
   TEST_CHECK(createPageFile (TESTPF));
@@ -161,4 +163,5 @@ testSeveralPages(void) {
   TEST_CHECK(destroyPageFile (TESTPF));  
 
   free(ph);
+  free(ph2);
 }
