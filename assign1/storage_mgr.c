@@ -23,32 +23,32 @@ extern void initStorageManager(void) { // Initialize the Storage Manager
     printf("Storage manager initialized\n");
 }
 
-extern RC createPageFile (char *fileName){ // Create a page file
-    FILE *file = fopen(fileName, "w+"); // Open the file for both reading and writing
+extern RC createPageFile (char *fileName){ // Creates a page file
+    FILE *file = fopen(fileName, "w+"); // Opens the file for both reading and writing
     SM_FileHeader fHeader;
     fHeader.totalNumPages = 1;          // The created file has 1 page
     fHeader.curPagePos = 0;             // The current position of the created file is 0
-    fwrite(&fHeader,1,sizeof(fHeader),file);    // Write 
-    char *charArray = calloc(PAGE_SIZE, 1);
-    int write = fwrite(charArray, 1, PAGE_SIZE, file);
-    fclose(file);
-    if (write != PAGE_SIZE){ 			
+    fwrite(&fHeader,1,sizeof(fHeader),file); // Write the binary representation of the struct fHeader to file
+    char *charArray = calloc(PAGE_SIZE, 1);  // Creates a character array of PAGE_SIZE and sets all its elements to 0
+    int write = fwrite(charArray, 1, PAGE_SIZE, file); // Write in file the binary representation of charArray 
+    fclose(file);  // Closes the file
+    if (write != PAGE_SIZE){  // Checks if all the binary representation of charArray was succesfully written to the file
         return RC_WRITE_FAILED;			
     }
-    free(charArray);
+    free(charArray); // Frees the memory previously allocated by calloc
     return(RC_OK);
 }
 
-extern RC openPageFile (char *fileName, SM_FileHandle *fHandle){
+extern RC openPageFile (char *fileName, SM_FileHandle *fHandle){ // Opens a page file
     FILE *file = fopen(fileName, "r+"); // Opens a file for both reading and writing
-    if(!file){   // If the file doesn't exist
-        return RC_FILE_NOT_FOUND;   // File not found
+    if(!file){   // Checks if the file exists
+        return RC_FILE_NOT_FOUND;   
     }
     SM_FileHeader fHeader;
-    fread(&fHeader, sizeof(fHeader), 1, file);
+    fread(&fHeader, 1, sizeof(fHeader), file);  // Reads the binary representation of fHeader from file and stores it in fHeader
     fHandle -> fileName = fileName;
     fHandle -> totalNumPages = fHeader.totalNumPages;
-    fHandle -> curPagePos = 0;
+    fHandle -> curPagePos = fHeader.curPagePos;
     fHandle -> mgmtInfo = file;
     return RC_OK;
 }
