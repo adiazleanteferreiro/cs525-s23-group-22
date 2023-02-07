@@ -49,4 +49,3 @@ This allowed us to more quickly access to the file associated to the `SM_FileHan
 An important consideration is that some methods reuse some of the other methods, for example: the `readNextBlock` method will use the `readBlock` method with the corresponding page number; the `ensureCapacity` method uses a while loop to call the `appendEmptyBlock` until the given number of pages is reached.
 
 This was done to prevent unnecessary duplicates among methods.
-
