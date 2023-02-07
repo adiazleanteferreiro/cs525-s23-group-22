@@ -6,11 +6,11 @@
 #include <stdio.h>
 #include <unistd.h>
 
-extern void initStorageManager(void) {
-    if (access(".", W_OK) != 0){
+extern void initStorageManager(void) { // Initialize the Storage Manager
+    if (access(".", W_OK) != 0){ // Check if we have write permission for the current working directory
         printf("Storage manager doesn't have write permission in this folder.\nExiting...\n");
         exit(RC_WRITE_FAILED);
-    }
+    } 
     // The following code initializes the structs in case there were stored values
     SM_FileHandle fileHandle;
     fileHandle.fileName = NULL;
@@ -23,55 +23,59 @@ extern void initStorageManager(void) {
     printf("Storage manager initialized\n");
 }
 
-extern RC createPageFile (char *fileName){
-    FILE *file = fopen(fileName, "w+");
+extern RC createPageFile (char *fileName){ // Creates a page file
+    FILE *file = fopen(fileName, "w+"); // Opens the file for both reading and writing
     SM_FileHeader fHeader;
-    fHeader.totalNumPages = 1;
-    fHeader.curPagePos = 0;
-    fwrite(&fHeader,sizeof(fHeader),1,file);
-    char *charArray = calloc(PAGE_SIZE, 1);
-    int write = fwrite(charArray, 1, PAGE_SIZE, file);
-    fclose(file);
-    if (write != PAGE_SIZE){ 			
+    fHeader.totalNumPages = 1;          // The created file has 1 page
+    fHeader.curPagePos = 0;             // The current position of the created file is 0
+    fwrite(&fHeader,1,sizeof(fHeader),file); // Write the binary representation of the struct fHeader to file
+    char *charArray = calloc(PAGE_SIZE, 1);  // Creates a character array of PAGE_SIZE and sets all its elements to 0
+    int write = fwrite(charArray, 1, PAGE_SIZE, file); // Write in file the binary representation of charArray 
+    fclose(file);  // Closes the file
+    if (write != PAGE_SIZE){  // Checks if all the binary representation of charArray was succesfully written to the file
         return RC_WRITE_FAILED;			
     }
-    free(charArray);
+    free(charArray); // Frees the memory previously allocated by calloc
     return(RC_OK);
 }
 
-extern RC openPageFile (char *fileName, SM_FileHandle *fHandle){
+extern RC openPageFile (char *fileName, SM_FileHandle *fHandle){ // Opens a page file
     FILE *file = fopen(fileName, "r+"); // Opens a file for both reading and writing
-    if(!file){   // If the file doesn't exist
-        return RC_FILE_NOT_FOUND;   // File not found
+    if(!file){  // Checks if the file exists
+        return RC_FILE_NOT_FOUND;   
     }
     SM_FileHeader fHeader;
-    fread(&fHeader, sizeof(fHeader), 1, file);
+    fread(&fHeader, 1, sizeof(fHeader), file);  // Reads the binary representation of fHeader from file and stores it in fHeader
+    // The following code updates the page information
     fHandle -> fileName = fileName;
     fHandle -> totalNumPages = fHeader.totalNumPages;
-    fHandle -> curPagePos = 0;
+    fHandle -> curPagePos = fHeader.curPagePos;
     fHandle -> mgmtInfo = file;
     return RC_OK;
 }
 
-extern RC closePageFile(SM_FileHandle *fHandle) {
+extern RC closePageFile(SM_FileHandle *fHandle) { // Closes the page file
     FILE *file = fHandle->mgmtInfo; // Opens the file for both reading and writing
-    if(!file){ // If the opened file is NULL 
-        return RC_FILE_NOT_FOUND;   // File not found
+    if(!file){  // Checks if the file exists 
+        return RC_FILE_NOT_FOUND;   
     }   
-    int status = fclose(file); // Closes the file
-    if(status != 0){
+    int status = fclose(file); 
+    if(status != 0){ // Checks if the file has been closed
         return RC_FILE_NOT_FOUND;
     } 
     return RC_OK;
 }
 
-extern RC destroyPageFile (char *fileName){
-    FILE *file = fopen(fileName, "r+");
-    if(!file){
+extern RC destroyPageFile (char *fileName){ // Destroyes the page file
+    FILE *file = fopen(fileName, "r+"); // Opens the file for both reading and writing
+    if(!file){  // Checks if the file exists
         return RC_FILE_NOT_FOUND;
     }
-    fclose(file);
-    remove(fileName);   // Maybe add status
+    int status = fclose(file);
+    if(status != 0){ // Checks if the file has been closed
+        return RC_FILE_NOT_FOUND;
+    }
+    remove(fileName); // Removes the file
     return RC_OK;
 }
 
