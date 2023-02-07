@@ -112,9 +112,9 @@ testSeveralPages(void) {
   SM_PageHandle ph;
   SM_PageHandle ph2;
 
-  testName = "test serveral page content";
-
   int i;
+
+  testName = "test serveral page content";
 
   // allocate memory for each page
   ph = (SM_PageHandle) malloc(PAGE_SIZE);
@@ -153,6 +153,7 @@ testSeveralPages(void) {
   printf("Second block was empty\n");
 
   int current = fh.curPagePos;
+
   ASSERT_EQUALS_INT(getBlockPos(&fh), fh.curPagePos, "Obtained position is not correct");
   printf("Position obtained correctly\n");
 
@@ -164,6 +165,7 @@ testSeveralPages(void) {
   printf("Capacity file has the correct number of pages\n");
 
   // Destroy the new page file
+  TEST_CHECK(closePageFile (&fh));
   TEST_CHECK(destroyPageFile (TESTPF));  
 
   free(ph);
