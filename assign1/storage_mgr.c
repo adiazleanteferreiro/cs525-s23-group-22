@@ -41,11 +41,12 @@ extern RC createPageFile (char *fileName){ // Creates a page file
 
 extern RC openPageFile (char *fileName, SM_FileHandle *fHandle){ // Opens a page file
     FILE *file = fopen(fileName, "r+"); // Opens a file for both reading and writing
-    if(!file){   // Checks if the file exists
+    if(!file){  // Checks if the file exists
         return RC_FILE_NOT_FOUND;   
     }
     SM_FileHeader fHeader;
     fread(&fHeader, 1, sizeof(fHeader), file);  // Reads the binary representation of fHeader from file and stores it in fHeader
+    // The following code updates the page information
     fHandle -> fileName = fileName;
     fHandle -> totalNumPages = fHeader.totalNumPages;
     fHandle -> curPagePos = fHeader.curPagePos;
@@ -53,25 +54,28 @@ extern RC openPageFile (char *fileName, SM_FileHandle *fHandle){ // Opens a page
     return RC_OK;
 }
 
-extern RC closePageFile(SM_FileHandle *fHandle) {
+extern RC closePageFile(SM_FileHandle *fHandle) { // Closes the page file
     FILE *file = fHandle->mgmtInfo; // Opens the file for both reading and writing
-    if(!file){ // If the opened file is NULL 
-        return RC_FILE_NOT_FOUND;   // File not found
+    if(!file){  // Checks if the file exists 
+        return RC_FILE_NOT_FOUND;   
     }   
-    int status = fclose(file); // Closes the file
-    if(status != 0){
+    int status = fclose(file); 
+    if(status != 0){ // Checks if the file has been closed
         return RC_FILE_NOT_FOUND;
     } 
     return RC_OK;
 }
 
-extern RC destroyPageFile (char *fileName){
-    FILE *file = fopen(fileName, "r+");
-    if(!file){
+extern RC destroyPageFile (char *fileName){ // Destroyes the page file
+    FILE *file = fopen(fileName, "r+"); // Opens the file for both reading and writing
+    if(!file){  // Checks if the file exists
         return RC_FILE_NOT_FOUND;
     }
-    fclose(file);
-    remove(fileName);   // Maybe add status
+    int status = fclose(file);
+    if(status != 0){ // Checks if the file has been closed
+        return RC_FILE_NOT_FOUND;
+    }
+    remove(fileName); // Removes the file
     return RC_OK;
 }
 
