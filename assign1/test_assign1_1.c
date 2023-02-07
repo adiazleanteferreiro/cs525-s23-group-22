@@ -114,8 +114,6 @@ testSeveralPages(void) {
 
   int i;
 
-  testName = "test several page content";
-
   // allocate memory for each page
   ph = (SM_PageHandle) malloc(PAGE_SIZE);
   ph2 = (SM_PageHandle) malloc(PAGE_SIZE);
@@ -147,8 +145,9 @@ testSeveralPages(void) {
 
   // check that the second page is empty 
   TEST_CHECK(readBlock(1, &fh, ph2);
+  
   for (i=0; i < PAGE_SIZE; i++)
-    ASSERT_TRUE((ph[i] == 0), "expected zero byte in new page freshly initialized page for the appended block");
+    ASSERT_TRUE((ph2[i] == 0), "expected zero byte in new page freshly initialized page for the appended block");
   printf("Second block was empty\n");
 
   int current = fh.curPagePos;
