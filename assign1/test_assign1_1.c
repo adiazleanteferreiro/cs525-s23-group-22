@@ -153,7 +153,10 @@ testSeveralPages(void) {
   printf("Second block was empty\n");
 
   int current = fh.curPagePos;
-  TEST_CHECK(getBlockPos(&fh) == fh.curPagePos);
+  ASSERT_EQUALS_INT(getBlockPos(&fh), fh.curPagePos, "Obtained position is not correct");
+  printf("Position obtained correctly\n");
+
+  printf("Checking capacity method correctly\n");
   TEST_CHECK((ensureCapacity(10, &fh)));
   ASSERT_EQUALS_INT(10, fh.totalNumPages, "expected 10 pages in the file capacity");
   ASSERT_EQUALS_INT(current, fh.curPagePos, "curPagePos should be 1 even if we added pages");
