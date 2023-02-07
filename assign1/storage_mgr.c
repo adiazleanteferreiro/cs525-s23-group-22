@@ -85,6 +85,7 @@ extern RC readBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage)
         return RC_FILE_NOT_FOUND;   // File not found
     }
     int position = PAGE_SIZE * pageNum + sizeof(fHeader); // We declare the position as the size of one page times the page number
+    
     if(fseek(file, position, SEEK_SET) != 0){ // If the seek is not successful (different than 0)
        return RC_READ_NON_EXISTING_PAGE;    // Non existing page
     }
@@ -163,8 +164,12 @@ extern RC appendEmptyBlock (SM_FileHandle *fHandle){
     }
     int position = getBlockPos(fHandle);
     SM_FileHeader fHeader;
+
     fread(&fHeader, sizeof(fHeader), 1, file);
-    fseek(file, fHandle->totalNumPages, SEEK_SET);
+
+    int lastPos = PAGE_SIZE * fHandle->totalNumPages + sizeof(fHeader);
+
+    fseek(file, lastPos , SEEK_SET);
 
     char * charArray =  calloc(PAGE_SIZE, 1);
 
@@ -175,8 +180,9 @@ extern RC appendEmptyBlock (SM_FileHandle *fHandle){
     }
     fHandle -> totalNumPages++;
     fHeader.totalNumPages++;
+
     int pos = PAGE_SIZE * position + sizeof(fHeader);
-    
+
     fseek(file, pos, SEEK_SET); // We go back to the previous current position
     free(charArray);
     return RC_OK;
