@@ -33,6 +33,16 @@ typedef struct BM_PageHandle {
 	char *data;
 } BM_PageHandle;
 
+typedef struct BM_PageFrame {
+    PageNumber pageNum; //pointer to a char array that holds the contents of the page in memory.
+    char *data; // integer that represents the page number in the page file that this page frame currently holds
+    bool dirty; //boolean value that indicates whether or not the contents of the page frame have been modified 
+    int fixCount; //an integer that keeps track of the number of times this page has been "fixed" (i.e., pinned in memory).
+    BM_PageHandle *pageHandle; //a pointer to a BM_PageHandle struct that represents a handle to this page frame
+    struct BM_PageFrame *next; //a pointer to the next page frame in the buffer pool's linked list. This is used to implement the page replacement strategy
+    struct BM_PageFrame *prev; //a pointer to the previous page frame in the buffer pool's linked list. This is used to implement the page replacement strategy
+} BM_PageFrame;
+
 // convenience macros
 #define MAKE_POOL()					\
 		((BM_BufferPool *) malloc (sizeof(BM_BufferPool)))
