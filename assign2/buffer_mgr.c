@@ -91,6 +91,10 @@ extern RC forceFlushPool(BM_BufferPool *const bm){
 	
 	BM_PageFrame *pageFrames = (BM_PageFrame *) bm->mgmtData;
     RC rc;
+    
+    if (pageFrames == NULL) {
+        return RC_WRITE_FAILED;
+    }
 
     for (int i = 0; i < bm->numPages; i++) {
         if (pageFrames[i].isDirty == true && pageFrames[i].fixCount == 0) {
@@ -109,11 +113,124 @@ extern RC forceFlushPool(BM_BufferPool *const bm){
 
 
 // Buffer Manager Interface Access Pages
-extern RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page);
-extern RC unpinPage (BM_BufferPool *const bm, BM_PageHandle *const page);
-extern RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page);
-extern RC pinPage (BM_BufferPool *const bm, BM_PageHandle *const page, 
-		const PageNumber pageNum);
+extern RC markDirty (BM_BufferPool *const bm, BM_PageHandle *const page) {
+    int pageNum = page->pageNum;
+    BM_PageFrame *pageFrame = ((BM_PageFrame*)bm->mgmtData) + pageNum;
+    
+    if (pageFrame != NULL) {
+        pageFrame->dirty = true;
+        return RC_OK;
+    }
+
+    return RC_WRITE_FAILED;
+}
+
+
+extern RC unpinPage(BM_BufferPool *const bm, BM_PageHandle *const page) {
+    // Get the page frame associated with the requested page
+    BM_PageFrame *pageFrame = ((BM_PageFrame*)bm->mgmtData) + page->pageNum;
+    
+    // Check if the requested page is currently pinned
+    if (pageFrame != NULL && pageFrame->fixCount > 0) {
+        pageFrame->fixCount--;
+        
+        // Update the page's data and pageNum fields
+        pageFrame -> pageHandle = page
+        pageFrame->pageNum = page->pageNum;
+        pageFrame->data = page->data;
+        return RC_OK;
+
+    }
+    return RC_WRITE_FAILED;
+}
+
+extern RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page) {
+    
+    BM_PageFrame *pageFrame = ((BM_PageFrame*)bm->mgmtData) + page->pageNum;
+
+    if (pageFrame == NULL) {
+        return RC_WRITE_FAILED;
+    }
+    
+    SM_FileHandle fh;
+   
+    
+    rc = (openPageFile(bm->pageFile, &fh) != RC_OK);
+    if (rc != RC_OK) {
+        return rc;
+    }
+   
+    rc = ensureCapacity(page->pageNum, &fh);
+    if (rc != RC_OK) {
+        return rc;
+    }
+
+    // Write page content to disk
+    rc = writeBlock(page->pageNum, &fh, pageFrame->data);
+    if (rc != RC_OK) {
+        return rc;
+    }
+
+    // Update dirty flag
+    pageFrame->dirty = false;
+    
+    // Close page file
+    closePageFile(&fh);
+    
+    return RC_OK;
+}
+
+
+extern RC pinPage(BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber pageNum) {
+    // Check if pageNum is valid
+    if (pageNum < 0 || pageNum >= bm->numPages) {
+        return RC_INVALID_PAGE_NUM;
+    }
+    
+    
+    BM_PageFrame *pageFrame = ((BM_PageFrame*)bm->mgmtData) + pageNum; // We add pageNum to the starting address to get a pointer to the correct page frame in memory.
+
+    // Check if the page is already pinned
+    if (pageFrame->fixCount > 0) {
+        page->pageNum = NO_PAGE;
+        page->data = NULL;
+        return RC_PAGE_IS_PINNED;
+    }
+    
+    // Read the page from disk if it is not in the buffer pool
+    if (pageFrame->pageNum == NO_PAGE) {
+        SM_FileHandle fh;
+        RC rc;
+        
+        rc = openPageFile(bm->pageFile, &fh);
+        if (rc != RC_OK) {
+            return rc;
+        }
+        
+        rc = ensureCapacity(pageNum + 1, &fh);
+        if (rc != RC_OK) {
+            return rc;
+        }
+        
+        rc = readBlock(pageNum, &fh, pageFrame->data);
+        if (rc != RC_OK) {
+            return rc;
+        }
+        
+        rc = closePageFile(&fh);
+        if (rc != RC_OK) {
+            return rc;
+        }
+        
+        pageFrame->pageNum = pageNum;
+        pageFrame->dirty = false;
+    }
+    
+    pageFrame->fixCount++;
+    pageFrame->data = page->data;
+    
+    return RC_OK;
+}
 
 
 
