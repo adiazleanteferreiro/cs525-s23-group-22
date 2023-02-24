@@ -152,8 +152,7 @@ extern RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page) {
         return RC_WRITE_FAILED;
     }
     
-    SM_FileHandle fh;
-   
+    SM_FileHandle fh;   
     
     rc = (openPageFile(bm->pageFile, &fh) != RC_OK);
     if (rc != RC_OK) {
@@ -170,68 +169,69 @@ extern RC forcePage (BM_BufferPool *const bm, BM_PageHandle *const page) {
     if (rc != RC_OK) {
         return rc;
     }
+    // increment write count
+    bm->writeCount++; 
+    
+    // Close page file
+    closePageFile(&fh);
 
     // Update dirty flag
     pageFrame->dirty = false;
     
-    // Close page file
-    closePageFile(&fh);
-    
     return RC_OK;
 }
 
-
+//Este Pin hay que revisarlo pq no me ha dado tiempo y seguro que le faltan cosas
 extern RC pinPage(BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber pageNum) {
     // Check if pageNum is valid
     if (pageNum < 0 || pageNum >= bm->numPages) {
         return RC_INVALID_PAGE_NUM;
     }
     
+    // Find the page frame in buffer pool, we do this by adding the pageNum to the struct.
+    BM_PageFrame *pageFrame = ((BM_PageFrame*)bm->mgmtData) + pageNum;
     
-    BM_PageFrame *pageFrame = ((BM_PageFrame*)bm->mgmtData) + pageNum; // We add pageNum to the starting address to get a pointer to the correct page frame in memory.
-
-    // Check if the page is already pinned
-    if (pageFrame->fixCount > 0) {
-        page->pageNum = NO_PAGE;
-        page->data = NULL;
-        return RC_PAGE_IS_PINNED;
+    // If page is already in buffer pool, return it
+    if (pageFrame->pageHandle != NULL) {
+        page->pageNum = pageNum;
+        page->data = pageFrame->data;
+        pageFrame->fixCount++;
+        return RC_OK;
     }
     
-    // Read the page from disk if it is not in the buffer pool
-    if (pageFrame->pageNum == NO_PAGE) {
-        SM_FileHandle fh;
-        RC rc;
-        
-        rc = openPageFile(bm->pageFile, &fh);
-        if (rc != RC_OK) {
-            return rc;
-        }
-        
-        rc = ensureCapacity(pageNum + 1, &fh);
-        if (rc != RC_OK) {
-            return rc;
-        }
-        
-        rc = readBlock(pageNum, &fh, pageFrame->data);
-        if (rc != RC_OK) {
-            return rc;
-        }
-        
-        rc = closePageFile(&fh);
-        if (rc != RC_OK) {
-            return rc;
-        }
-        
-        pageFrame->pageNum = pageNum;
-        pageFrame->dirty = false;
+    // Otherwise, read page from disk
+    SM_FileHandle fh;
+    
+    RC rc = openPageFile(bm->pageFile, &fh);
+    if (rc != RC_OK) return rc;
+    
+    rc = ensureCapacity(pageNum, &fh);
+    if (rc != RC_OK) {
+        closePageFile(&fh);
+        return rc;
     }
     
-    pageFrame->fixCount++;
-    pageFrame->data = page->data;
+    rc = readBlock(pageNum, &fh, pageFrame->data); //read values into the page frame
+    if (rc != RC_OK) {
+        closePageFile(&fh);
+        return rc;
+    }
+    
+    bm->readCount++; // increment read count
+    closePageFile(&fh);
+    
+    // Update page frame metadata
+    pageFrame->pageHandle = page;
+    pageFrame->fixCount = 1;
+    pageFrame->dirty = false;
+    pageFrame->pageNum = pageNum;
+    
+    // Update page handle
+    page->pageNum = pageNum;
+    page->data = pageFrame->data;
     
     return RC_OK;
 }
-
 
 
 // Statistics Interface
